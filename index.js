@@ -14,7 +14,7 @@ spark.login({accessToken: process.env.access_token_spark})
 spark.getDevice(process.env.device_id_spark, function(err, device) {
   console.log('Device name: ' + device.name)
   var job1 = new CronJob({
-    cronTime: '00 48 19 * * 0-6',
+    cronTime: '00 31 22 * * 0-6',
     //
     onTick: function() {
       console.log("Creating cron job for morning")
@@ -22,6 +22,15 @@ spark.getDevice(process.env.device_id_spark, function(err, device) {
       var nightEnd = times.nightEnd
       var goldenHourEnd = times.goldenHourEnd
       var timeUntilFullLight = goldenHourEnd - nightEnd // in milliseconds
+      //
+      device.callFunction('startAlarm', timeUntilFullLight, function(error, data) {
+        if (err) {
+          console.log('An error occurred:', error)
+        } else {
+          console.log('Function called succesfully:', data)
+        }
+      })
+      //
       var job2 = new CronJob({
         cronTime: nightEnd,
         onTick: function() {

@@ -13,7 +13,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, PIXEL_TYPE);
 unsigned long t;
 unsigned long timeUntilFinish;
 unsigned long timeBegin;
-unsigned long sunriseMilliseconds;
+unsigned long sunrise;
 
 void setup() {
     Serial.begin(9600);
@@ -24,7 +24,7 @@ void setup() {
     initialize();
 
     Spark.function("startAlarm", initiateAlarm);
-
+    Spark.function("turnOff", initiateTurnOff);
 }
 
 void loop() {
@@ -32,7 +32,12 @@ void loop() {
 }
 
 int initiateAlarm(String command) {
-    sunriseMilliseconds = command.toInt();
+    sunrise = command.toInt();
+    lightClock(sunrise);
+    return 1;
+}
+
+void lightClock(unsigned long sunriseMilliseconds) {
     timeBegin = millis();
     timeUntilFinish = timeBegin + sunriseMilliseconds;
     t = timeBegin;
@@ -43,7 +48,19 @@ int initiateAlarm(String command) {
         }
         strip.show();
         t = millis();
+        Serial.print("Time: ");
+        Serial.println(t);
+        Serial.print("Brightness: ");
+        Serial.println(brightness);
+        Spark.process();
     }
+}
+
+int initiateTurnOff(String command) {
+    for(int i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, strip.Color(0, 0, 0));
+    }
+    strip.show();
     return 1;
 }
 

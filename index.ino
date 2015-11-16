@@ -13,7 +13,11 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, PIXEL_TYPE);
 unsigned long t;
 unsigned long timeUntilFinish;
 unsigned long timeBegin;
-unsigned long sunrise;
+unsigned long sunriseMilliseconds;
+
+int redMax = 255;
+int greenMax = 204;
+int blueMax = 0;
 
 void setup() {
     Serial.begin(9600);
@@ -32,28 +36,28 @@ void loop() {
 }
 
 int initiateAlarm(String command) {
-    sunrise = command.toInt();
-    lightClock(sunrise);
-    return 1;
-}
-
-void lightClock(unsigned long sunriseMilliseconds) {
+    sunriseMilliseconds = command.toInt();
     timeBegin = millis();
     timeUntilFinish = timeBegin + sunriseMilliseconds;
     t = timeBegin;
     while (t <= timeUntilFinish) {
-        int brightness = map(t, 0, sunriseMilliseconds, 0, 255);
+        int red = map(t, 0, sunriseMilliseconds, 0, redMax);
+        int green = map(t, 0, sunriseMilliseconds, 0, greenMax);
+        int blue = map(t, 0, sunriseMilliseconds, 0, blueMax);
         for(int i=0; i<strip.numPixels(); i++) {
-          strip.setPixelColor(i, strip.Color(brightness, brightness, brightness));
+          strip.setPixelColor(i, strip.Color(red, green, blue));
         }
         strip.show();
         t = millis();
         Serial.print("Time: ");
         Serial.println(t);
-        Serial.print("Brightness: ");
-        Serial.println(brightness);
+        Serial.print("rgb: ");
+        Serial.println(red);
+        Serial.println(green);
+        Serial.println(blue);
         Spark.process();
     }
+    return 1;
 }
 
 int initiateTurnOff(String command) {
@@ -66,7 +70,7 @@ int initiateTurnOff(String command) {
 
 void initialize() {
     for(int i = 0; i < strip.numPixels(); i++) {
-        strip.setPixelColor(i, strip.Color(255, 255, 255));
+        strip.setPixelColor(i, strip.Color(redMax, greenMax, blueMax));
     }
     strip.show();
     delay(2000);
@@ -76,7 +80,7 @@ void initialize() {
     strip.show();
     delay(2000);
     for(int i = 0; i < strip.numPixels(); i++) {
-        strip.setPixelColor(i, strip.Color(255, 255, 255));
+        strip.setPixelColor(i, strip.Color(redMax, greenMax, blueMax));
     }
     strip.show();
     delay(2000);
